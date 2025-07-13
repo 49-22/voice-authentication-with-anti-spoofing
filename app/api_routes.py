@@ -10,7 +10,7 @@ router = APIRouter()
 async def enroll_user(file: UploadFile = File(...), user_id: str = Form(...)):
     filename = f"temp_{uuid.uuid4()}.wav"
 
-    with open(filename, "Wb") as f:
+    with open(filename, "wb") as f:
         f.write(await file.read())
 
     embedding = extract_embedding(filename)
