@@ -11,12 +11,17 @@ def load_faiss():
     if os.path.exists(index_path):
         return faiss.read_index(index_path)
     else:
-        return faiss.IndexFlatL2(512)
+        return faiss.IndexFlatL2(192)  # Changed from 512 to 192
 
 # save embedding to FAISS
 def save_to_faiss(user_id, embedding):
     index = load_faiss()
-    embedding = np.array([embedding]).astype("float32")
+    # Ensure embedding is a 2D float32 numpy array
+    embedding = np.asarray(embedding, dtype=np.float32)
+    if embedding.ndim == 1:
+        embedding = embedding.reshape(1, -1)
+    assert embedding.shape[1] == index.d, f"Embedding dim {embedding.shape[1]} != index dim {index.d}"
+    
     index.add(embedding)
     faiss.write_index(index, index_path)
 
