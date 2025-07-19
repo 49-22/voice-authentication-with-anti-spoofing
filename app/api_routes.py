@@ -19,3 +19,10 @@ async def enroll_user(file: UploadFile = File(...), user_id: str = Form(...)):
     save_to_faiss(user_id, embedding)
 
     return {"message": "User enrolled", "user_id": user_id}
+
+
+# TODO: Verify
+
+# TODO: Challenge
+
+# TODO: Spoof detection / anti-spoofing

@@ -11,13 +11,15 @@ def load_faiss():
     if os.path.exists(index_path):
         return faiss.read_index(index_path)
     else:
-        return faiss.IndexFlatL2(192)  # Changed from 512 to 192
+        return faiss.IndexFlatL2(192)  # temporarily Changed from 512 to 192
 
 # save embedding to FAISS
 def save_to_faiss(user_id, embedding):
     index = load_faiss()
     # Ensure embedding is a 2D float32 numpy array
     embedding = np.asarray(embedding, dtype=np.float32)
+
+    # TODO: error handling for embedding shape
     if embedding.ndim == 1:
         embedding = embedding.reshape(1, -1)
     assert embedding.shape[1] == index.d, f"Embedding dim {embedding.shape[1]} != index dim {index.d}"
@@ -31,5 +33,8 @@ def save_to_faiss(user_id, embedding):
             metadata = pickle.load(f)
     metadata[index.ntotal - 1] = user_id
 
+    # TODO: Add remaining metadata handling like device, language, model used, purpose, liveness_score, timestamp etc.
+
     with open(meta_path, "wb") as f:
         pickle.dump(metadata, f)
+        f"Saved metadata for user {user_id} at index {index.ntotal - 1}"

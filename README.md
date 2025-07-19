@@ -21,3 +21,8 @@ To run this repo, follow the setup as follows:
 5. curl -X POST http://localhost:8000/enroll \
   -F "user_id=test_user" \
   -F "file=@app/voice/common_voice_en_41910500.mp3"
+
+
+<!-- Dataset -->
+<!-- Challenges -->
+<!-- has been done so-far with screenshots and voice -->
