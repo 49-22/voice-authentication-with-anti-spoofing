@@ -1,6 +1,48 @@
 # voice-authentication-with-anti-spoofing
 Voice-Based Biometric Authentication with Multilingual and Anti-spoofing capabilities
 
+# Project flow
++-------------+
+|  User Voice |
++-------------+
+      |
+      v
++-------------------------+
+| Frontend / Mobile App  |
+| (Send voice via API)   |
++-------------------------+
+      |
+      v
++-------------------------+
+| FastAPI Backend         |
++-------------------------+
+|  /enroll      /verify   |
+|  /spoof_check /challenge|
++-------------------------+
+      |
+      v
++--------------------------+
+| Speaker Embedding Engine |
+| (ECAPA-TDNN - 512 vector)|
++--------------------------+
+      |
+      +--> Check Against Stored Embeddings (FAISS DB)
+      |
+      +--> Pass to Anti-Spoofing Model (AASIST)
+      |
+      +--> Optionally pass to Whisper ASR for phrase verification
+      |
+      v
++--------------------------+
+| Authentication Decision  |
++--------------------------+
+      |
+      v
++--------------------------+
+| Return Auth Result (JSON)|
++--------------------------+
+
+
 To run this repo, follow the setup as follows:
 # install core depdencies
 1. pip install fastapi uvicorn pydantic numpy scipy
