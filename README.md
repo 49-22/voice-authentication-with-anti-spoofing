@@ -1,6 +1,7 @@
 # voice-authentication-with-anti-spoofing
 Voice-Based Biometric Authentication with Multilingual and Anti-spoofing capabilities
 
+
 To run this repo, follow the setup as follows:
 # install core depdencies
 1. pip install fastapi uvicorn pydantic numpy scipy
