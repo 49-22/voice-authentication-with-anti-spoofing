@@ -56,4 +56,4 @@ FastAPI route: enroll_user()
 save_to_faiss(user_id, embedding)
         |
         v
-index.add(embedding)  <-- (Error if shape
+index.add(embedding)  <-- (Error if shape mismatch)
