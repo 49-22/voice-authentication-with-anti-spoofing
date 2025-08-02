@@ -2,6 +2,7 @@ import faiss
 import numpy as np
 import os
 import pickle
+from datetime import datetime
 
 index_path = "data/embeddings/faiss.index"
 meta_path = "data/embeddings/metadata.pkl"
@@ -14,7 +15,7 @@ def load_faiss():
         return faiss.IndexFlatL2(192)  # temporarily Changed from 512 to 192
 
 # save embedding to FAISS
-def save_to_faiss(user_id, embedding):
+def save_to_faiss(user_id, embedding, language="en", device="unknown", model="ECAPA-TDNN"):
     index = load_faiss()
     # Ensure embedding is a 2D float32 numpy array
     embedding = np.asarray(embedding, dtype=np.float32)
@@ -31,10 +32,35 @@ def save_to_faiss(user_id, embedding):
     if os.path.exists(meta_path):
         with open(meta_path, "rb") as f:
             metadata = pickle.load(f)
-    metadata[index.ntotal - 1] = user_id
+    else:
+        metadata = {}
+    
+    entry = {
+        "user_id": user_id,
+        language: language,
+        "device_info": device,
+        "embedding_model": model,
+        "enrollment_time": datetime.now().isoformat(),
+        # Add other metadata fields as needed  
+    }
+
+    metadata[index.ntotal - 1] = entry
 
     # TODO: Add remaining metadata handling like device, language, model used, purpose, liveness_score, timestamp etc.
 
     with open(meta_path, "wb") as f:
         pickle.dump(metadata, f)
         f"Saved metadata for user {user_id} at index {index.ntotal - 1}"
+
+def get_user_metadata(user_id):
+    if not os.path.exists(meta_path):
+        return None
+    
+    with open(meta_path, "rb") as f:
+        metadata = pickle.load(f)
+    
+    for idx, uid in metadata.items():
+        if uid == user_id:
+            return metadata[idx]
+    
+    return None

@@ -23,6 +23,11 @@ To run this repo, follow the setup as follows:
   -F "user_id=test_user" \
   -F "file=@app/voice/common_voice_en_41910500.mp3"
 
+# To fetch a single user
+6. curl -X GET http://localhost:8000/users/test_user1
+
+# To fetch all users
+7. curl -X GET http://localhost:8000/users/
 
 <!-- Dataset -->
 <!-- Challenges -->
