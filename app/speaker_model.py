@@ -1,4 +1,4 @@
-from speechbrain.pretrained import SpeakerRecognition
+from speechbrain.inference import SpeakerRecognition
 import torchaudio
 
 speaker_model = SpeakerRecognition.from_hparams(

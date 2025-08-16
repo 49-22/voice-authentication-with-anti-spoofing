@@ -29,6 +29,14 @@ To run this repo, follow the setup as follows:
 # To fetch all users
 7. curl -X GET http://localhost:8000/users/
 
+# To verify
+curl -X POST http://localhost:8000/verify \
+  -F "file=@app/voice/common_voice_en_41910500.mp3"
+
+# To Spoof check
+curl -X POST http://localhost:8000/spoof-check \
+  -F "file=@app/voice/common_voice_en_41910500.mp3"
+
 <!-- Dataset -->
 <!-- Challenges -->
 <!-- has been done so-far with screenshots and voice -->
