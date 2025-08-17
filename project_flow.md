@@ -11,12 +11,15 @@
 +-------------------------+
       |
       v
-+-------------------------+
-| FastAPI Backend         |
-+-------------------------+
-|  /enroll      /verify   |
-|  /spoof_check /challenge|
-+-------------------------+
++---------------------------------------------------------------------------------------------------------------------+
+| FastAPI Backend                                                                                                     |
++---------------------------------------------------------------------------------------------------------------------+
+|  /enroll     (enroll with bot check as well)                                                                        |
+|  /verify                                                                                                            |
+|     /challenge/verify                   (this verifies the random text generated is matched or not)                 |
+|     /spoof_check                        (this verifies if its not spoof voice)                                      |
+      /closest-embedding-check            (this verifies if the user voice embedding is found)                        |
++---------------------------------------------------------------------------------------------------------------------+
       |
       v
 +------------------------------+

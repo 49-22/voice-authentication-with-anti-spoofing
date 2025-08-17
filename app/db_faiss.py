@@ -65,7 +65,7 @@ def get_user_metadata(user_id):
     
     return None
 
-def verify_speaker(query_embedding, threshold=0.75):
+def verify_speaker_embedding(query_embedding, threshold=0.75):
     index = faiss.read_index(index_path)
     query_embedding = np.array([query_embedding]).astype('float32')
 

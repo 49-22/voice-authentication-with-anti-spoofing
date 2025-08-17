@@ -3,7 +3,7 @@ import uuid
 import os
 from app.speaker_model import extract_embedding
 from app.db_faiss import save_to_faiss
-from app.db_faiss import verify_speaker
+from app.db_faiss import verify_speaker_embedding
 from aasist.aasist_inference import infer_spoof_score
 from app.asr_whisper import verify_phrase
 from app.challenge import new_challenge, get_challenge, consume_challenge
@@ -33,7 +33,6 @@ async def enroll_user(file: UploadFile = File(...), user_id: str = Form(...), la
     return {"message": "User enrolled", "user_id": user_id}
 
 
-# TODO: Verify
 @router.post("/challenge/verify")
 async def challenge_verify(challenge_id: str = Form(...), file: UploadFile = File(...)):
     meta = get_challenge(challenge_id)
@@ -109,10 +108,12 @@ async def verify_user(file: UploadFile = File(...), expected_phrase: str = Form(
             os.remove(filename)
             return {"status": "rejected", "reason": "passphrase_mismatch", "similarity": sim, "transcript": said}
     
+    # TODO: Verify spoof-check before proceedig to embedding check, if failed, return here
+
     embedding = extract_embedding(filename)
     os.remove(filename)
 
-    result = verify_speaker(embedding)
+    result = verify_speaker_embedding(embedding)
 
     if expected_phrase:
         result["passphrase_checked"] = True
