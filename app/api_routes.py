@@ -1,21 +1,29 @@
-from fastapi import APIRouter, UploadFile, File, Form
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 import uuid
 import os
 from app.speaker_model import extract_embedding
 from app.db_faiss import save_to_faiss
 from app.db_faiss import verify_speaker
 from aasist.aasist_inference import infer_spoof_score
+from app.asr_whisper import verify_phrase
+from app.challenge import new_challenge, get_challenge, consume_challenge
 AASIST_CONFIG_PATH = "aasist/config/AASIST.conf"
 
 
 router = APIRouter()
 
 @router.post("/enroll")
-async def enroll_user(file: UploadFile = File(...), user_id: str = Form(...), language: str = Form("en"), device: str = Form("unknown")):
+async def enroll_user(file: UploadFile = File(...), user_id: str = Form(...), language: str = Form("en"), device: str = Form("unknown"), expected_phrase: str = Form(None)):
     filename = f"temp_{uuid.uuid4()}.wav"
 
     with open(filename, "wb") as f:
         f.write(await file.read())
+
+    if expected_phrase:
+        ok, sim, said = verify_phrase(filename, expected_phrase, language=language, thresh=0.8)
+        if not ok:
+            os.remove(filename)
+            return HTTPException(status_code=400, detail={"error": "passphrase_mismatch", "similarity": sim, "transcript": said})
 
     embedding = extract_embedding(filename)
     os.remove(filename)
@@ -26,10 +34,36 @@ async def enroll_user(file: UploadFile = File(...), user_id: str = Form(...), la
 
 
 # TODO: Verify
+@router.post("/challenge/verify")
+async def challenge_verify(challenge_id: str = Form(...), file: UploadFile = File(...)):
+    meta = get_challenge(challenge_id)
+    if not meta:
+        raise HTTPException(status_code=400, detail="Challenge not found or expired")
+    
+    temp = f"temp_{uuid.uuid4()}.wav"
+
+    with open(temp, "wb") as f:
+        f.write(await file.read())
+
+    ok, sim, said = verify_phrase(temp, meta["phrase"], langauge=meta["lang"], thresh=0.8)
+    os.remove(temp)
+
+    if not ok:
+        return {"passphrase_ok": False, "similarity": sim, "transcript": said}
+    
+    consume_challenge(challenge_id)
+
+    return {"passphrase_ok": True, "similarity": sim, "transcript": said, "expected": meta["phrase"]}
 
 # TODO: Challenge
-
-# TODO: Spoof detection / anti-spoofing
+@router.get("/challenge/start")
+def challenge_start(lang: str = "en"):
+    cid, phrase, lang = new_challenge(lang)
+    return {
+        "challenge_id": cid,
+        "phrase": phrase,
+        "language": lang
+    }
 
 # view all enrolled users
 @router.get("/users")
@@ -64,15 +98,26 @@ async def get_user(user_id: str):
     return {"user_id": user_id, "metadata": metadata}
 
 @router.post("/verify")
-async def verify_user(file: UploadFile = File(...)):
-    filename = f"temp_verify.wav"
+async def verify_user(file: UploadFile = File(...), expected_phrase: str = Form(None), language: str = Form(None)):
+    filename = f"temp_{uuid.uuid4()}.wav"
     with open(filename, "wb") as f:
         f.write(await file.read())
+
+    if expected_phrase:
+        ok, sim, said = verify_phrase(filename, expected_phrase, langauge=language, thresh=0.8)
+        if not ok:
+            os.remove(filename)
+            return {"status": "rejected", "reason": "passphrase_mismatch", "similarity": sim, "transcript": said}
     
     embedding = extract_embedding(filename)
     os.remove(filename)
 
     result = verify_speaker(embedding)
+
+    if expected_phrase:
+        result["passphrase_checked"] = True
+        result["passphrase_similarity"] = round(sim, 3)
+        result["transcript"] = said
 
     return result
 
