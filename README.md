@@ -63,7 +63,3 @@ curl -X POST http://localhost:8000/verify \
 # To Spoof check
 curl -X POST http://localhost:8000/spoof-check \
   -F "file=@app/voice/common_voice_en_41910500.mp3"
-
-<!-- Dataset -->
-<!-- Challenges -->
-<!-- has been done so-far with screenshots and voice -->
